@@ -6,9 +6,10 @@ interface Props {
   lang?: string
   title?: string
   code: string
+  footer?: string; // <--- 新增：明确声明 footer 属性
 }
 
-const { frame, title, lang, code } = Astro.props
+const { frame, title, lang, code, footer } = Astro.props
 ---
 
 <div
@@ -16,5 +17,11 @@ const { frame, title, lang, code } = Astro.props
 >
   <div class="bg-neutral-100/90 text-neutral-500 rounded-lg overflow-clip">
     <Code frame={frame} title={title} lang={lang} code={code} />
+    {/* <--- 新增：如果 footer 存在，则渲染一个区域来显示它 ---> */}
+    {footer && (
+      <div class="px-4 py-2 border-t border-neutral-200 bg-neutral-100 text-sm text-neutral-500">
+        {footer}
+      </div>
+    )}
   </div>
 </div>

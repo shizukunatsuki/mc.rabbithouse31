@@ -43,15 +43,16 @@ const { class: className } = Astro.props
         const hash = (link as HTMLAnchorElement).hash;
         return hash ? document.querySelector(hash) : null;
       })
-      .filter(Boolean);
+      .filter((el): el is Element => el !== null);
 
     if (sections.length === 0) return;
 
-    const updateActiveLink = (targetId) => {
+    const updateActiveLink = (targetId: string) => { // <--- 修复：添加 string 类型
       sidebarLinks.forEach(link => {
         const anchor = link as HTMLAnchorElement;
         const linkHref = anchor.getAttribute('href');
-        if (targetId && linkHref.endsWith('#' + targetId)) {
+        // <--- 修复：添加 linkHref 的 null 检查
+        if (targetId && linkHref && linkHref.endsWith('#' + targetId)) {
           anchor.classList.add('is-active');
         } else if (!targetId && linkHref === '/guide/server_guide') {
           anchor.classList.add('is-active');
@@ -61,44 +62,33 @@ const { class: className } = Astro.props
       });
     };
 
-    // --- 1. 处理点击事件 (使用手动滚动计算) ---
     sidebarLinks.forEach(link => {
       link.addEventListener('click', (e) => {
         const anchor = e.currentTarget as HTMLAnchorElement;
         const hash = anchor.hash;
-
         updateActiveLink(hash.substring(1));
-
         if (hash) {
-          e.preventDefault(); // 必须阻止默认行为
-
+          e.preventDefault();
           const targetSection = document.querySelector(hash);
-          const header = document.querySelector('header'); // 获取顶栏元素
-
-          if (targetSection && header) {
+          const header = document.querySelector('header');
+          // <--- 修复：使用 instanceof 类型守卫
+          if (targetSection instanceof HTMLElement && header instanceof HTMLElement) {
             const headerHeight = header.offsetHeight;
             const elementPosition = targetSection.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.scrollY - headerHeight;
-
-            // --- 这是实现“居中”的核心计算 ---
-            const elementHeight = targetSection.offsetHeight;
+            const elementHeight = targetSection.offsetHeight; // <--- 修复：现在可以安全访问
             const viewportHeight = window.innerHeight;
-            
-            // 计算目标位置，使其中心位于可见区域的中心
             const finalScrollPosition = offsetPosition - (viewportHeight / 2) + (elementHeight / 2) + headerHeight;
-
             window.scrollTo({
               top: finalScrollPosition,
               behavior: 'smooth'
             });
-
             history.pushState(null, '', hash);
           }
         }
       });
     });
 
-    // --- 2. 处理滚动事件 (逻辑不变) ---
     const observer = new IntersectionObserver((entries) => {
       let topmostVisibleEntry = null;
       for (const entry of entries) {
@@ -118,7 +108,6 @@ const { class: className } = Astro.props
 
     sections.forEach(section => observer.observe(section));
 
-    // --- 3. 初始加载 (逻辑不变) ---
     const initialHash = window.location.hash.substring(1);
     updateActiveLink(initialHash);
   });

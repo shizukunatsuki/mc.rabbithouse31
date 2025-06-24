@@ -4,6 +4,7 @@ interface Props {
   text: string
   gradient?: boolean
   class?: string
+  id?: string; // <--- 新增：明确声明 id 属性是可选的字符串
 }
 
 const { level = 2, text, gradient, class: className, ...props } = Astro.props
