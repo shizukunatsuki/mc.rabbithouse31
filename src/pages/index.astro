@@ -1,7 +1,6 @@
 ---
 import { Button } from 'free-astro-components'
 import Code from '../components/Code.astro'
-// 移除了对 CTA.astro 的导入，因为它不再被使用
 import Footer from '../components/Footer.astro'
 import Header from '../components/Header.astro'
 import Hero from '../sections/Hero.astro'
@@ -22,15 +21,15 @@ import Sidebar from '../layouts/Sidebar.astro'
       <div>
         <Button href="/guide/server_guide" label="查看服务器指南" />
       </div>
-      <div>
+      {/* 
+        关键改动：
+        在包裹 <Code /> 组件的 div 上添加了 class="break-all"。
+      */}
+      <div class="break-all">
         <Code code="play.mc.rabbithouse31.natsuki.cloud" />
       </div>
     </Hero>
     <Intro />
-    <!-- 
-      根据您的指示，
-      原有的 <CTA /> 组件部分已从这里被完全删除。
-    -->
   </main>
   <Footer />
 </Layout>
