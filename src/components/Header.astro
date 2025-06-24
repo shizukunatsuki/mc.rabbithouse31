@@ -1,5 +1,6 @@
 ---
-import { Icon, ThemeSwitch } from 'free-astro-components'
+// 移除了 ThemeSwitch 的导入
+import { Icon } from 'free-astro-components'
 import Hamburguer from './Hamburguer.astro'
 ---
 
@@ -12,7 +13,7 @@ import Hamburguer from './Hamburguer.astro'
       href="/"
       aria-label="Free Astro components"
     >
-      <Icon icon="star" class="w-8 h-8" />
+      <Icon icon="ellipse" class="w-8 h-8" />
     </a>
 
     <nav>
@@ -20,18 +21,18 @@ import Hamburguer from './Hamburguer.astro'
         <li>
           <a
             class="text-sm hover:text-primary transition duration-300 ease-in-out"
-            href="/guide/installation">Documentation</a
+            href="https://rabbithouse31.natsuki.cloud/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >关于我们</a
           >
         </li>
-        <li class="hidden lg:block">
-          <a
-            class="text-sm hover:text-primary transition duration-300 ease-in-out"
-            href="/components/button">Components</a
-          >
-        </li>
-        <li>
-          <ThemeSwitch />
-        </li>
+        {/* 
+          根据您的指示，ThemeSwitch 组件已从此删除。
+          <li>
+            <ThemeSwitch />
+          </li>
+        */}
         <li class="lg:hidden">
           <Hamburguer />
         </li>

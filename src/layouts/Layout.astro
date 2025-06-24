@@ -1,49 +1,65 @@
 ---
+import { ViewTransitions } from 'astro:transitions'
+
 interface Props {
   title: string
+  description?: string
 }
 
-const { title } = Astro.props
+const {
+  title = 'Free Astro Components',
+  description = 'A collection of free to use components for Astro',
+} = Astro.props
 ---
 
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="description"
-      content="You can use these components to build your Astro projects faster."
-    />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    {/* 
+      关键改动 1: 
+      将初始 favicon 设置为“空心圆 (○)”，这是标签页处于焦点时的状态。
+    */}
+    <link
+      id="favicon"
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>○</text></svg>"
+    />
+    <ViewTransitions fallback="none" />
   </head>
-  <body>
+  <body class="bg-white text-zinc-900 antialiased">
     <slot />
+
+    {/* 
+      关键改动 2:
+      添加客户端脚本来处理 favicon 的动态切换。
+    */}
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', () => {
+        // 获取 favicon 元素
+        const faviconLink = document.getElementById('favicon');
+        if (!faviconLink) return;
+
+        // 定义两种状态下的 favicon 内容 (SVG Data URI)
+        const faviconFocused = `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>○</text></svg>`;
+        const faviconBlurred = `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♡</text></svg>`;
+
+        // 监听标签页可见性变化事件
+        document.addEventListener('visibilitychange', () => {
+          // 判断标签页当前是否可见
+          if (document.visibilityState === 'visible') {
+            // 如果可见（用户回来了），则设置为空心圆
+            faviconLink.setAttribute('href', faviconFocused);
+          } else {
+            // 如果不可见（用户离开了），则设置为实心心形
+            faviconLink.setAttribute('href', faviconBlurred);
+          }
+        });
+      });
+    </script>
   </body>
 </html>
-
-<style is:global>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
-  html {
-    @apply scroll-smooth;
-  }
-  main {
-    @apply min-h-dvh;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-medium text-balance max-w-[25ch];
-  }
-
-  p {
-    @apply font-light text-pretty max-w-[65ch];
-  }
-</style>

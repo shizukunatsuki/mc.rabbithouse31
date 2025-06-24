@@ -17,28 +17,109 @@ const { class: className } = Astro.props
     class="w-full h-full lg:border-r border-neutral-300/50 px-5 py-4 overflow-y-auto"
   >
     <Nav>
-      <NavItem title="Guide" open>
-        <NavLink href="/guide/installation" label="Installation" />
-        <NavLink href="/guide/colors" label="Colors" />
-        <NavLink href="/guide/customize-colors" label="Customize Colors" />
+      <NavItem title="网站导航" open>
+        <NavLink href="/" label="返回首页" />
       </NavItem>
-      <NavItem title="Components" open>
-        <NavLink href="/components/accordion" label="Accordion" />
-        <NavLink href="/components/button" label="Button" />
-        <NavLink href="/components/checkbox" label="Checkbox" />
-        <NavLink href="/components/icon" label="Icon" />
-        <NavLink href="/components/input" label="Input" />
-        <NavLink href="/components/modal" label="Modal" />
-        <NavLink href="/components/radio" label="Radio" />
-        <NavLink href="/components/select" label="Select" />
-        <NavLink href="/components/switch" label="Switch" />
-        <NavLink href="/components/tab" label="Tab" />
-        <NavLink href="/components/textarea" label="Textarea" />
-        <NavLink href="/components/theme-switch" label="Theme Switch" />
-      </NavItem>
-      <NavItem title="Resources" open>
-        <NavLink href="/resources/available-icons" label="Available Icons" />
+      <NavItem title="服务器指南" open>
+        <NavLink href="/guide/server_guide" label="指南首页" />
+        <NavLink href="/guide/server_guide#server-info" label="服务器信息" />
+        <NavLink href="/guide/server_guide#notes" label="服务器注意事项" />
+        <NavLink href="/guide/server_guide#login-method" label="登录方式" class="pl-4" />
+        <NavLink href="/guide/server_guide#faq" label="常见问题" class="pl-4" />
+        <NavLink href="/guide/server_guide#rules" label="服务器规范" class="pl-4" />
       </NavItem>
     </Nav>
   </div>
 </aside>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.querySelector('aside[data-nav]');
+    if (!sidebar) return;
+
+    const sidebarLinks = sidebar.querySelectorAll('a[href^="/guide/server_guide"]');
+    const sections = Array.from(sidebarLinks)
+      .map(link => {
+        const hash = (link as HTMLAnchorElement).hash;
+        return hash ? document.querySelector(hash) : null;
+      })
+      .filter(Boolean);
+
+    if (sections.length === 0) return;
+
+    const updateActiveLink = (targetId) => {
+      sidebarLinks.forEach(link => {
+        const anchor = link as HTMLAnchorElement;
+        const linkHref = anchor.getAttribute('href');
+        if (targetId && linkHref.endsWith('#' + targetId)) {
+          anchor.classList.add('is-active');
+        } else if (!targetId && linkHref === '/guide/server_guide') {
+          anchor.classList.add('is-active');
+        } else {
+          anchor.classList.remove('is-active');
+        }
+      });
+    };
+
+    // --- 1. 处理点击事件 (使用手动滚动计算) ---
+    sidebarLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        const anchor = e.currentTarget as HTMLAnchorElement;
+        const hash = anchor.hash;
+
+        updateActiveLink(hash.substring(1));
+
+        if (hash) {
+          e.preventDefault(); // 必须阻止默认行为
+
+          const targetSection = document.querySelector(hash);
+          const header = document.querySelector('header'); // 获取顶栏元素
+
+          if (targetSection && header) {
+            const headerHeight = header.offsetHeight;
+            const elementPosition = targetSection.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.scrollY - headerHeight;
+
+            // --- 这是实现“居中”的核心计算 ---
+            const elementHeight = targetSection.offsetHeight;
+            const viewportHeight = window.innerHeight;
+            
+            // 计算目标位置，使其中心位于可见区域的中心
+            const finalScrollPosition = offsetPosition - (viewportHeight / 2) + (elementHeight / 2) + headerHeight;
+
+            window.scrollTo({
+              top: finalScrollPosition,
+              behavior: 'smooth'
+            });
+
+            history.pushState(null, '', hash);
+          }
+        }
+      });
+    });
+
+    // --- 2. 处理滚动事件 (逻辑不变) ---
+    const observer = new IntersectionObserver((entries) => {
+      let topmostVisibleEntry = null;
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          topmostVisibleEntry = entry;
+          break;
+        }
+      }
+      if (topmostVisibleEntry) {
+        updateActiveLink(topmostVisibleEntry.target.id);
+      } else if (sections.length > 0 && window.scrollY < sections[0].getBoundingClientRect().top + window.scrollY - 100) {
+        updateActiveLink('');
+      }
+    }, {
+      rootMargin: '0px 0px -85% 0px',
+    });
+
+    sections.forEach(section => observer.observe(section));
+
+    // --- 3. 初始加载 (逻辑不变) ---
+    const initialHash = window.location.hash.substring(1);
+    updateActiveLink(initialHash);
+  });
+</script>

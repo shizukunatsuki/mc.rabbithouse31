@@ -1,7 +1,7 @@
 ---
 import { Button } from 'free-astro-components'
 import Code from '../components/Code.astro'
-import CTA from '../sections/CTA.astro'
+// 移除了对 CTA.astro 的导入，因为它不再被使用
 import Footer from '../components/Footer.astro'
 import Header from '../components/Header.astro'
 import Hero from '../sections/Hero.astro'
@@ -10,30 +10,27 @@ import Layout from '../layouts/Layout.astro'
 import Sidebar from '../layouts/Sidebar.astro'
 ---
 
-<Layout title="Free Astro Components">
+<Layout title="welcome come on~">
   <Sidebar class="lg:hidden" />
   <Header />
   <main>
     <Hero
       align="center"
-      title="A collection of <strong>Free Astro Components</strong>"
-      description="You can use these components to build your Astro projects faster."
+      title="总之就是Minecraft服务器"
+      description="下面不知道写什么"
     >
       <div>
-        <Button href="/guide/installation" label="Get started" />
+        <Button href="/guide/server_guide" label="查看服务器指南" />
       </div>
       <div>
-        <Code code="npm install free-astro-components" />
+        <Code code="play.mc.rabbithouse31.natsuki.cloud" />
       </div>
     </Hero>
     <Intro />
-    <CTA
-      align="center"
-      title="Ready to <strong>Get Started?</strong>"
-      description="Explore my collection of free Astro components and start building your next project today."
-    >
-      <Button href="/components/button" label="Explore Components" />
-    </CTA>
+    <!-- 
+      根据您的指示，
+      原有的 <CTA /> 组件部分已从这里被完全删除。
+    -->
   </main>
   <Footer />
 </Layout>

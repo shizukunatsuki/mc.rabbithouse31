@@ -1,11 +1,15 @@
 ---
 const { href, label, class: className } = Astro.props
-const currentPath = new URL(Astro.request.url).pathname
+const { pathname, hash } = Astro.url
+
+// 关键改动：只有当链接的href与当前页面的pathname完全相同，且URL中没有hash时，才认为是active
+// 这确保了只有在访问页面根路径时，“指南首页”才会被静态高亮。
+const isActive = href === pathname && hash === ''
 
 const linkClasses = [
   'flex items-center gap-4 text-sm text-neutral-500 hover:text-primary/90 [&.is-active]:text-primary [&.is-active]:font-medium pl-5 py-1 border-l border-neutral-200 hover:border-neutral-400 [&.is-active]:border-primary transition duration-300 ease-in-out',
   className,
-  href === currentPath ? 'is-active' : '',
+  isActive ? 'is-active' : '',
 ]
 ---
 

@@ -7,27 +7,36 @@ import { Icon } from 'free-astro-components'
     <div
       class="flex flex-col gap-8 lg:flex-row lg:justify-between lg:items-center"
     >
-      <div class="flex flex-col gap-8">
+      <!-- 左侧内容: Logo 和署名 -->
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
         <a
           href="/"
           class="text-primary hover:text-secondary transition duration-300 ease-in-out"
           aria-label="Free Astro components"
         >
-          <Icon icon="star" class="w-10 h-10" />
+          <Icon icon="ellipse" class="w-10 h-10" />
         </a>
         <p class="text-neutral-500">
-          A Collection of <strong>Free Astro Components</strong>
+          by rabbithouse31 team
         </p>
       </div>
-      <div class="flex flex-col gap-4 lg:flex-row lg:gap-8">
-        <div class="flex flex-col gap-4">
-          <h4 class="text-neutral-700 text-lg">Resources</h4>
-          <ul class="text-neutral-500 flex flex-col gap-2">
-            <li><a href="/guide/installation">Documentation</a></li>
-            <li><a href="/components/button">Components</a></li>
-          </ul>
-        </div>
-      </div>
+
+      <!-- 右侧导航 -->
+      <nav>
+        <ul class="text-neutral-500 flex flex-col gap-2 lg:flex-row lg:gap-8">
+          <li>
+            <a 
+              href="https://rabbithouse31.natsuki.cloud/" 
+              class="hover:text-primary transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              关于我们
+            </a>
+          </li>
+          <!-- 如果需要，可以在这里添加更多链接 -->
+        </ul>
+      </nav>
     </div>
   </div>
 </footer>

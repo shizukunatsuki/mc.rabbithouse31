@@ -1,0 +1,114 @@
+---
+// 导入所有需要的布局和展示组件
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Sidebar from '../../layouts/Sidebar.astro';
+import Content from '../../layouts/Content.astro';
+import Article from '../../components/Article.astro';
+import Prose from '../../components/Prose.astro';
+import Heading from '../../components/Heading.astro';
+import Text from '../../components/Text.astro';
+import List from '../../components/List.astro';
+import ListItem from '../../components/ListItem.astro';
+import CodeBlock from '../../components/CodeBlock.astro';
+---
+
+<Layout title="服务器指南 - 木结构小镇">
+  <Header />
+  <Sidebar />
+  <Content>
+    <section>
+      <Article>
+        <Heading
+          slot="header"
+          level={1}
+          gradient
+          class="inline-block"
+          text="木结构小镇服务器指南"
+        />
+
+        <Prose>
+          {/* 添加了 id="server-info" */}
+          <Heading id="server-info" level={2} text="服务器信息" />
+          <List>
+            <ListItem>
+              <Text><strong>版本：</strong> 1.20.1 Forge</Text>
+            </ListItem>
+            <ListItem>
+              <Text><strong>推荐运存：</strong> 8GB 分配给客户端</Text>
+            </ListItem>
+            <ListItem>
+              <Text><strong>客户端下载：</strong> 请于QQ群文件内的“服务器客户端”文件夹中下载整合包。</Text>
+            </ListItem>
+             <ListItem>
+              <Text><strong>注意：</strong> 若服务器无法连接，请联系 natsuki (なつき) 重启服务器。</Text>
+            </ListItem>
+          </List>
+          <Text><strong>服务器地址：</strong></Text>
+          <CodeBlock
+            frame="terminal"
+            lang="bash"
+            code="play.mc.rabbithouse31.natsuki.cloud"
+          />
+        </Prose>
+
+        <Prose>
+          {/* 添加了 id="notes" */}
+          <Heading id="notes" level={2} text="服务器注意事项" />
+
+          {/* 添加了 id="login-method" */}
+          <Heading id="login-method" level={3} text="一、登录方式" />
+          <Text>
+            本服务器仅能通过我们提供的特定客户端登录。整合包已包含所有必需的Mod和配置，支持离线账户、正版账户及外置账户登录。
+          </Text>
+
+          {/* 添加了 id="faq" */}
+          <Heading id="faq" level={3} text="二、常见问题" />
+          <Text>
+            <strong>问：</strong> 第一次加入服务器后，为什么我无法移动，并且视角被锁定？
+          </Text>
+          <Text>
+            <strong>答：</strong> 这是因为您还未注册服务器账户。请按 `T` 键或 `/` 键呼出聊天框，根据以下指令操作：
+          </Text>
+          <Text><strong>首次注册指令：</strong></Text>
+          <CodeBlock
+            lang="bash"
+            code="/register 你的密码 你的密码"
+            footer="例如: /register 123456 123456"
+          />
+          <Text><strong>后续登录指令：</strong></Text>
+          <CodeBlock
+            lang="bash"
+            code="/login 你的密码"
+            footer="简写指令: /l 你的密码 (例如: /l 123456)"
+          />
+
+          {/* 添加了 id="rules" */}
+          <Heading id="rules" level={3} text="三、服务器规范" />
+          <List>
+            <ListItem>
+              <Text>
+                <strong>1. 建筑保护：</strong> 不能恶意损毁服务器内任何人工建筑。一经发现，违规者将被OP封禁游戏账号；若再次出现，将直接封禁其IP地址。
+              </Text>
+            </ListItem>
+            <ListItem>
+              <Text>
+                <strong>2. 文明交流：</strong> 不得在聊天中发送含有人格侮辱性质的词汇。处理方式与上一条相同。
+              </Text>
+            </ListItem>
+          </List>
+        </Prose>
+
+        <Prose>
+            <Heading level={2} text="祝您游戏愉快！" />
+            <Text>
+                现在您已经了解了所有基本信息，可以开始您的冒险了！
+            </Text>
+        </Prose>
+
+      </Article>
+    </section>
+  </Content>
+  <Footer />
+</Layout>
