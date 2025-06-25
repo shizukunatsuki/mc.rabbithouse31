@@ -74,26 +74,12 @@ import Sidebar from '../layouts/Sidebar.astro'
     box-shadow: 0 0 0 3px rgba(255, 192, 203, 0.6);
     outline: none;
   }
-
-  .dropdown-menu {
-    opacity: 0;
-    transform: scale(0.95) translateY(-10px);
-    visibility: hidden;
-  }
-
-  [data-dropdown-container].open .dropdown-menu {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    visibility: visible;
-  }
 </style>
 
 <script>
-  // 定义一个全局的 AbortController 实例，用于管理所有事件监听器
   let abortController: AbortController;
 
   function initializeDropdown() {
-    // 每次初始化时，都创建一个新的 AbortController
     abortController = new AbortController();
     const signal = abortController.signal;
 
@@ -118,7 +104,6 @@ import Sidebar from '../layouts/Sidebar.astro'
     if (canHover) {
       let openTimeout: ReturnType<typeof setTimeout> | undefined;
       let closeTimeout: ReturnType<typeof setTimeout> | undefined;
-      // 将 signal 传递给事件监听器
       dropdownContainer.addEventListener('mouseenter', () => {
         clearTimeout(closeTimeout);
         openTimeout = setTimeout(openMenu, 200);
@@ -131,7 +116,10 @@ import Sidebar from '../layouts/Sidebar.astro'
       triggerButton.addEventListener('click', (event) => {
         event.stopPropagation();
         dropdownContainer.classList.contains('open') ? closeMenu() : openMenu();
-        triggerButton.blur();
+        // 关键修复：使用 setTimeout 延迟执行 blur，确保在浏览器状态恢复后运行
+        setTimeout(() => {
+          triggerButton.blur();
+        }, 100);
       }, { signal });
     }
 
@@ -154,14 +142,16 @@ import Sidebar from '../layouts/Sidebar.astro'
   }
 
   function cleanupDropdown() {
-    // 在页面切换前，如果存在 AbortController，则调用 abort()
-    // 这会一次性移除所有关联的事件监听器
     if (abortController) {
       abortController.abort();
     }
   }
 
-  // 使用 Astro 推荐的、最可靠的生命周期事件
-  document.addEventListener('astro:page-load', initializeDropdown);
-  document.addEventListener('astro:before-swap', cleanupDropdown);
+  // 最终的生命周期管理：清理 -> 初始化
+  function resetAndInitialize() {
+    cleanupDropdown();
+    initializeDropdown();
+  }
+
+  document.addEventListener('astro:page-load', resetAndInitialize);
 </script>
