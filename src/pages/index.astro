@@ -74,6 +74,18 @@ import Sidebar from '../layouts/Sidebar.astro'
     box-shadow: 0 0 0 3px rgba(255, 192, 203, 0.6);
     outline: none;
   }
+
+  .dropdown-menu {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+    visibility: hidden;
+  }
+
+  [data-dropdown-container].open .dropdown-menu {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    visibility: visible;
+  }
 </style>
 
 <script>
@@ -116,10 +128,7 @@ import Sidebar from '../layouts/Sidebar.astro'
       triggerButton.addEventListener('click', (event) => {
         event.stopPropagation();
         dropdownContainer.classList.contains('open') ? closeMenu() : openMenu();
-        // 关键修复：使用 setTimeout 延迟执行 blur，确保在浏览器状态恢复后运行
-        setTimeout(() => {
-          triggerButton.blur();
-        }, 100);
+        triggerButton.blur();
       }, { signal });
     }
 
@@ -142,16 +151,21 @@ import Sidebar from '../layouts/Sidebar.astro'
   }
 
   function cleanupDropdown() {
+    // 关键修复：在销毁旧页面之前，主动找到旧按钮并清除其焦点/active状态
+    const dropdownContainer = document.querySelector('[data-dropdown-container]');
+    if (dropdownContainer) {
+        const triggerButton = dropdownContainer.querySelector('.dropdown-trigger') as HTMLElement;
+        if (triggerButton) {
+            triggerButton.blur();
+        }
+    }
+
+    // 然后，像之前一样，中止所有事件监听器
     if (abortController) {
       abortController.abort();
     }
   }
 
-  // 最终的生命周期管理：清理 -> 初始化
-  function resetAndInitialize() {
-    cleanupDropdown();
-    initializeDropdown();
-  }
-
-  document.addEventListener('astro:page-load', resetAndInitialize);
+  document.addEventListener('astro:page-load', initializeDropdown);
+  document.addEventListener('astro:before-swap', cleanupDropdown);
 </script>
