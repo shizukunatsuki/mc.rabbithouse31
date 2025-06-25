@@ -1,6 +1,5 @@
 ---
 import { Button } from 'free-astro-components'
-// import Code from '../components/Code.astro' // 保持清理
 import Footer from '../components/Footer.astro'
 import Header from '../components/Header.astro'
 import Hero from '../sections/Hero.astro'
@@ -9,7 +8,7 @@ import Layout from '../layouts/Layout.astro'
 import Sidebar from '../layouts/Sidebar.astro'
 ---
 
-<Layout title="点兔频道｜木结构街道服务器">
+<Layout title="welcome come on~">
   <Sidebar class="lg:hidden" />
   <Header />
   <main>
@@ -90,14 +89,20 @@ import Sidebar from '../layouts/Sidebar.astro'
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  // 1. 将所有初始化逻辑封装到一个可重用的函数中
+  function initializeDropdown() {
     const dropdownContainer = document.querySelector('[data-dropdown-container]');
     if (!dropdownContainer) return;
+
+    // 检查是否已经初始化过，防止重复绑定事件
+    if (dropdownContainer.hasAttribute('data-initialized')) {
+      return;
+    }
+    dropdownContainer.setAttribute('data-initialized', 'true');
 
     const triggerButton = dropdownContainer.querySelector('.dropdown-trigger');
     if (!triggerButton) return;
     
-    // 最终修复：使用 ReturnType<typeof setTimeout> 来获取正确的计时器类型
     let openTimeout: ReturnType<typeof setTimeout> | undefined;
     let closeTimeout: ReturnType<typeof setTimeout> | undefined;
 
@@ -129,11 +134,20 @@ import Sidebar from '../layouts/Sidebar.astro'
         });
     });
 
-    document.addEventListener('keydown', (event) => {
+    // 注意：这个事件监听器需要保持在函数内部，以便能访问到闭包中的变量
+    const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && dropdownContainer.classList.contains('open')) {
         clearTimeout(closeTimeout);
         closeMenu();
       }
-    });
-  });
+    };
+    
+    document.addEventListener('keydown', handleEscKey);
+  }
+
+  // 2. 在首次加载时运行初始化函数
+  initializeDropdown();
+
+  // 3. 在每次 Astro 页面切换后，再次运行初始化函数
+  document.addEventListener('astro:after-swap', initializeDropdown);
 </script>
