@@ -89,7 +89,6 @@ import Sidebar from '../layouts/Sidebar.astro'
 </style>
 
 <script>
-  // 将所有逻辑封装到一个函数中
   function initializeDropdown() {
     const dropdownContainer = document.querySelector('[data-dropdown-container]');
     if (!dropdownContainer) return;
@@ -97,8 +96,8 @@ import Sidebar from '../layouts/Sidebar.astro'
     const triggerButton = dropdownContainer.querySelector('.dropdown-trigger');
     if (!triggerButton) return;
     
-    let openTimeout;
-    let closeTimeout;
+    let openTimeout: ReturnType<typeof setTimeout> | undefined;
+    let closeTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const openMenu = () => {
       dropdownContainer.classList.add('open');
@@ -110,11 +109,9 @@ import Sidebar from '../layouts/Sidebar.astro'
       triggerButton.setAttribute('aria-expanded', 'false');
     };
     
-    // 检测是否为触摸设备
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
     if (isTouchDevice) {
-      // --- 移动端（触摸屏）的“点击”逻辑 ---
       triggerButton.addEventListener('click', (event) => {
         event.stopPropagation();
         const isOpen = dropdownContainer.classList.toggle('open');
@@ -122,12 +119,12 @@ import Sidebar from '../layouts/Sidebar.astro'
       });
 
       document.addEventListener('click', (event) => {
-        if (!dropdownContainer.contains(event.target)) {
+        // 最终修复：将 event.target 断言为 Node 类型
+        if (!dropdownContainer.contains(event.target as Node)) {
           closeMenu();
         }
       });
     } else {
-      // --- 桌面端（鼠标）的“悬停”逻辑 ---
       dropdownContainer.addEventListener('mouseenter', () => {
         clearTimeout(closeTimeout);
         openTimeout = setTimeout(openMenu, 200);
@@ -139,7 +136,6 @@ import Sidebar from '../layouts/Sidebar.astro'
       });
     }
     
-    // --- 通用逻辑 ---
     const menuLinks = dropdownContainer.querySelectorAll('.dropdown-menu a');
     menuLinks.forEach(link => {
         link.addEventListener('click', () => {
@@ -156,9 +152,7 @@ import Sidebar from '../layouts/Sidebar.astro'
     });
   }
 
-  // 首次加载时运行
   initializeDropdown();
   
-  // 每次视图过渡（页面切换）后都重新运行，这是解决问题的关键
   document.addEventListener('astro:after-swap', initializeDropdown);
 </script>
