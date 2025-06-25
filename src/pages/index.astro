@@ -89,22 +89,15 @@ import Sidebar from '../layouts/Sidebar.astro'
 </style>
 
 <script>
-  // 1. 将所有初始化逻辑封装到一个可重用的函数中
   function initializeDropdown() {
     const dropdownContainer = document.querySelector('[data-dropdown-container]');
-    if (!dropdownContainer) return;
-
-    // 检查是否已经初始化过，防止重复绑定事件
-    if (dropdownContainer.hasAttribute('data-initialized')) {
+    if (!dropdownContainer || dropdownContainer.hasAttribute('data-initialized')) {
       return;
     }
     dropdownContainer.setAttribute('data-initialized', 'true');
 
     const triggerButton = dropdownContainer.querySelector('.dropdown-trigger');
     if (!triggerButton) return;
-    
-    let openTimeout: ReturnType<typeof setTimeout> | undefined;
-    let closeTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const openMenu = () => {
       dropdownContainer.classList.add('open');
@@ -116,38 +109,56 @@ import Sidebar from '../layouts/Sidebar.astro'
       triggerButton.setAttribute('aria-expanded', 'false');
     };
 
-    dropdownContainer.addEventListener('mouseenter', () => {
-      clearTimeout(closeTimeout);
-      openTimeout = setTimeout(openMenu, 200);
-    });
+    // 关键：检测设备是否支持悬停
+    const canHover = window.matchMedia('(hover: hover)').matches;
 
-    dropdownContainer.addEventListener('mouseleave', () => {
-      clearTimeout(openTimeout);
-      closeTimeout = setTimeout(closeMenu, 300);
-    });
-    
+    if (canHover) {
+      // --- 桌面端 (有鼠标) 的逻辑 ---
+      let openTimeout: ReturnType<typeof setTimeout> | undefined;
+      let closeTimeout: ReturnType<typeof setTimeout> | undefined;
+
+      dropdownContainer.addEventListener('mouseenter', () => {
+        clearTimeout(closeTimeout);
+        openTimeout = setTimeout(openMenu, 200);
+      });
+
+      dropdownContainer.addEventListener('mouseleave', () => {
+        clearTimeout(openTimeout);
+        closeTimeout = setTimeout(closeMenu, 300);
+      });
+    } else {
+      // --- 移动端 (触摸屏) 的逻辑 ---
+      triggerButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isOpen = dropdownContainer.classList.contains('open');
+        if (isOpen) {
+          closeMenu();
+        } else {
+          openMenu();
+        }
+      });
+    }
+
+    // --- 以下是两种设备共享的逻辑 ---
     const menuLinks = dropdownContainer.querySelectorAll('.dropdown-menu a');
     menuLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            clearTimeout(closeTimeout);
-            closeMenu();
-        });
+      link.addEventListener('click', closeMenu);
     });
 
-    // 注意：这个事件监听器需要保持在函数内部，以便能访问到闭包中的变量
+    document.addEventListener('click', (event) => {
+      if (!dropdownContainer.contains(event.target as Node)) {
+        closeMenu();
+      }
+    });
+    
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && dropdownContainer.classList.contains('open')) {
-        clearTimeout(closeTimeout);
         closeMenu();
       }
     };
-    
     document.addEventListener('keydown', handleEscKey);
   }
 
-  // 2. 在首次加载时运行初始化函数
   initializeDropdown();
-
-  // 3. 在每次 Astro 页面切换后，再次运行初始化函数
   document.addEventListener('astro:after-swap', initializeDropdown);
 </script>
