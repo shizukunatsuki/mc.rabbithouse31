@@ -1,6 +1,6 @@
 ---
 import { Button } from 'free-astro-components'
-// import Code from '../components/Code.astro' // 清理：移除了未使用的导入
+// import Code from '../components/Code.astro' // 保持清理
 import Footer from '../components/Footer.astro'
 import Header from '../components/Header.astro'
 import Hero from '../sections/Hero.astro'
@@ -95,12 +95,11 @@ import Sidebar from '../layouts/Sidebar.astro'
     if (!dropdownContainer) return;
 
     const triggerButton = dropdownContainer.querySelector('.dropdown-trigger');
-    // 修复：在使用前进行非空检查
     if (!triggerButton) return;
     
-    // 修复：为计时器变量添加明确的类型
-    let openTimeout: number | undefined;
-    let closeTimeout: number | undefined;
+    // 最终修复：使用 ReturnType<typeof setTimeout> 来获取正确的计时器类型
+    let openTimeout: ReturnType<typeof setTimeout> | undefined;
+    let closeTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const openMenu = () => {
       dropdownContainer.classList.add('open');
@@ -114,13 +113,11 @@ import Sidebar from '../layouts/Sidebar.astro'
 
     dropdownContainer.addEventListener('mouseenter', () => {
       clearTimeout(closeTimeout);
-      // @ts-ignore - setTimeout在浏览器和Node.js中返回类型不同，为兼容性忽略此行
       openTimeout = setTimeout(openMenu, 200);
     });
 
     dropdownContainer.addEventListener('mouseleave', () => {
       clearTimeout(openTimeout);
-      // @ts-ignore - setTimeout在浏览器和Node.js中返回类型不同，为兼容性忽略此行
       closeTimeout = setTimeout(closeMenu, 300);
     });
     
