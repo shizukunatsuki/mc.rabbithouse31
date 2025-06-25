@@ -1,5 +1,6 @@
 ---
 import { Button } from 'free-astro-components'
+// import Code from '../components/Code.astro' // 保持清理
 import Footer from '../components/Footer.astro'
 import Header from '../components/Header.astro'
 import Hero from '../sections/Hero.astro'
@@ -35,7 +36,7 @@ import Sidebar from '../layouts/Sidebar.astro'
             aria-orientation="vertical"
           >
             <a
-              href="https://qm.qq.com/q/fZDqrHvjHO"
+              href="https://qun.qq.com/universal-share/share?ac=1&authKey=Qvd01Pvcjb%2B2i9bsIecTcsdBgyde1bOikhojhCo2K4ddShwH5p8bFNLHdzFiVHeJ&busi_data=eyJncm91cENvZGUiOiIxNzI4NDY4MzkiLCJ0b2tlbiI6IlJteEtYaENlUDVRR3hLMk5naE11EQjArdElyUjU2RWUwM1dieURJVUNnaG82aGM5bXBxOTUzMkFBRjM5bndubkIiLCJ1aW4iOiIxNDg5OTc4ODQyIn0%3D&data=bjEQoTz9hMcDYQxrw-UjmWpStD9MFa7s-4jqa8oJomSa-CMPTIPkjEn9jF8jrFZfYQyIzl75pG-Fvf9tEGwFnA&svctype=4&tempid=h5_group_info"
               target="_blank"
               class="block w-full rounded-md px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100"
               role="menuitem"
@@ -89,17 +90,16 @@ import Sidebar from '../layouts/Sidebar.astro'
 </style>
 
 <script>
-  let abortController: AbortController;
-
-  function initializeDropdown() {
-    abortController = new AbortController();
-    const signal = abortController.signal;
-
+  document.addEventListener('DOMContentLoaded', () => {
     const dropdownContainer = document.querySelector('[data-dropdown-container]');
     if (!dropdownContainer) return;
 
-    const triggerButton = dropdownContainer.querySelector('.dropdown-trigger') as HTMLElement;
+    const triggerButton = dropdownContainer.querySelector('.dropdown-trigger');
     if (!triggerButton) return;
+    
+    // 最终修复：使用 ReturnType<typeof setTimeout> 来获取正确的计时器类型
+    let openTimeout: ReturnType<typeof setTimeout> | undefined;
+    let closeTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const openMenu = () => {
       dropdownContainer.classList.add('open');
@@ -111,61 +111,29 @@ import Sidebar from '../layouts/Sidebar.astro'
       triggerButton.setAttribute('aria-expanded', 'false');
     };
 
-    const canHover = window.matchMedia('(hover: hover)').matches;
-
-    if (canHover) {
-      let openTimeout: ReturnType<typeof setTimeout> | undefined;
-      let closeTimeout: ReturnType<typeof setTimeout> | undefined;
-      dropdownContainer.addEventListener('mouseenter', () => {
-        clearTimeout(closeTimeout);
-        openTimeout = setTimeout(openMenu, 200);
-      }, { signal });
-      dropdownContainer.addEventListener('mouseleave', () => {
-        clearTimeout(openTimeout);
-        closeTimeout = setTimeout(closeMenu, 300);
-      }, { signal });
-    } else {
-      triggerButton.addEventListener('click', (event) => {
-        event.stopPropagation();
-        dropdownContainer.classList.contains('open') ? closeMenu() : openMenu();
-        triggerButton.blur();
-      }, { signal });
-    }
-
-    const menuLinks = dropdownContainer.querySelectorAll('.dropdown-menu a');
-    menuLinks.forEach(link => {
-      link.addEventListener('click', closeMenu, { signal });
+    dropdownContainer.addEventListener('mouseenter', () => {
+      clearTimeout(closeTimeout);
+      openTimeout = setTimeout(openMenu, 200);
     });
 
-    document.addEventListener('click', (event) => {
-      if (!dropdownContainer.contains(event.target as Node)) {
-        closeMenu();
-      }
-    }, { signal });
+    dropdownContainer.addEventListener('mouseleave', () => {
+      clearTimeout(openTimeout);
+      closeTimeout = setTimeout(closeMenu, 300);
+    });
     
+    const menuLinks = dropdownContainer.querySelectorAll('.dropdown-menu a');
+    menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            clearTimeout(closeTimeout);
+            closeMenu();
+        });
+    });
+
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && dropdownContainer.classList.contains('open')) {
+        clearTimeout(closeTimeout);
         closeMenu();
       }
-    }, { signal });
-  }
-
-  function cleanupDropdown() {
-    // 关键修复：在销毁旧页面之前，主动找到旧按钮并清除其焦点/active状态
-    const dropdownContainer = document.querySelector('[data-dropdown-container]');
-    if (dropdownContainer) {
-        const triggerButton = dropdownContainer.querySelector('.dropdown-trigger') as HTMLElement;
-        if (triggerButton) {
-            triggerButton.blur();
-        }
-    }
-
-    // 然后，像之前一样，中止所有事件监听器
-    if (abortController) {
-      abortController.abort();
-    }
-  }
-
-  document.addEventListener('astro:page-load', initializeDropdown);
-  document.addEventListener('astro:before-swap', cleanupDropdown);
+    });
+  });
 </script>
