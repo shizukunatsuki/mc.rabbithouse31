@@ -74,19 +74,31 @@ import Sidebar from '../layouts/Sidebar.astro'
     box-shadow: 0 0 0 3px rgba(255, 192, 203, 0.6);
     outline: none;
   }
+
+  .dropdown-menu {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+    visibility: hidden;
+  }
+
+  [data-dropdown-container].open .dropdown-menu {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    visibility: visible;
+  }
 </style>
 
 <script>
-  // 将事件处理器定义在外部，以便能被正确地添加和移除
-  let handleDocumentClick: (event: MouseEvent) => void;
-  let handleEscKey: (event: KeyboardEvent) => void;
+  // 定义一个全局的 AbortController 实例，用于管理所有事件监听器
+  let abortController: AbortController;
 
   function initializeDropdown() {
+    // 每次初始化时，都创建一个新的 AbortController
+    abortController = new AbortController();
+    const signal = abortController.signal;
+
     const dropdownContainer = document.querySelector('[data-dropdown-container]');
-    if (!dropdownContainer || dropdownContainer.hasAttribute('data-initialized')) {
-      return;
-    }
-    dropdownContainer.setAttribute('data-initialized', 'true');
+    if (!dropdownContainer) return;
 
     const triggerButton = dropdownContainer.querySelector('.dropdown-trigger') as HTMLElement;
     if (!triggerButton) return;
@@ -106,52 +118,46 @@ import Sidebar from '../layouts/Sidebar.astro'
     if (canHover) {
       let openTimeout: ReturnType<typeof setTimeout> | undefined;
       let closeTimeout: ReturnType<typeof setTimeout> | undefined;
+      // 将 signal 传递给事件监听器
       dropdownContainer.addEventListener('mouseenter', () => {
         clearTimeout(closeTimeout);
         openTimeout = setTimeout(openMenu, 200);
-      });
+      }, { signal });
       dropdownContainer.addEventListener('mouseleave', () => {
         clearTimeout(openTimeout);
         closeTimeout = setTimeout(closeMenu, 300);
-      });
+      }, { signal });
     } else {
       triggerButton.addEventListener('click', (event) => {
         event.stopPropagation();
         dropdownContainer.classList.contains('open') ? closeMenu() : openMenu();
-        // 关键修复：在移动端点击后，立即让按钮失去焦点，强制清除“粘性”状态
         triggerButton.blur();
-      });
+      }, { signal });
     }
 
     const menuLinks = dropdownContainer.querySelectorAll('.dropdown-menu a');
     menuLinks.forEach(link => {
-      link.addEventListener('click', closeMenu);
+      link.addEventListener('click', closeMenu, { signal });
     });
 
-    handleDocumentClick = (event: MouseEvent) => {
+    document.addEventListener('click', (event) => {
       if (!dropdownContainer.contains(event.target as Node)) {
         closeMenu();
       }
-    };
+    }, { signal });
     
-    handleEscKey = (event: KeyboardEvent) => {
+    document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && dropdownContainer.classList.contains('open')) {
         closeMenu();
       }
-    };
-
-    document.addEventListener('click', handleDocumentClick);
-    document.addEventListener('keydown', handleEscKey);
+    }, { signal });
   }
 
   function cleanupDropdown() {
-    // 在页面切换前，移除所有全局事件监听器
-    document.removeEventListener('click', handleDocumentClick);
-    document.removeEventListener('keydown', handleEscKey);
-    // 重置初始化标志，以便新页面上的组件可以被初始化
-    const dropdownContainer = document.querySelector('[data-dropdown-container]');
-    if (dropdownContainer) {
-      dropdownContainer.removeAttribute('data-initialized');
+    // 在页面切换前，如果存在 AbortController，则调用 abort()
+    // 这会一次性移除所有关联的事件监听器
+    if (abortController) {
+      abortController.abort();
     }
   }
 
