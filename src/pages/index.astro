@@ -89,6 +89,23 @@ import Sidebar from '../layouts/Sidebar.astro'
 </style>
 
 <script>
+  // 将事件处理函数定义在外部，以便能被 add 和 remove
+  const handleEscKey = (event: KeyboardEvent) => {
+    const container = document.querySelector('[data-dropdown-container].open');
+    if (event.key === 'Escape' && container) {
+      container.classList.remove('open');
+      container.querySelector('.dropdown-trigger')?.setAttribute('aria-expanded', 'false');
+    }
+  };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    const container = document.querySelector('[data-dropdown-container]');
+    if (container && !container.contains(event.target as Node)) {
+      container.classList.remove('open');
+      container.querySelector('.dropdown-trigger')?.setAttribute('aria-expanded', 'false');
+    }
+  };
+
   function initializeDropdown() {
     const dropdownContainer = document.querySelector('[data-dropdown-container]');
     if (!dropdownContainer || dropdownContainer.hasAttribute('data-initialized')) {
@@ -103,62 +120,53 @@ import Sidebar from '../layouts/Sidebar.astro'
       dropdownContainer.classList.add('open');
       triggerButton.setAttribute('aria-expanded', 'true');
     };
-
     const closeMenu = () => {
       dropdownContainer.classList.remove('open');
       triggerButton.setAttribute('aria-expanded', 'false');
     };
 
-    // 关键：检测设备是否支持悬停
     const canHover = window.matchMedia('(hover: hover)').matches;
-
     if (canHover) {
-      // --- 桌面端 (有鼠标) 的逻辑 ---
-      let openTimeout: ReturnType<typeof setTimeout> | undefined;
-      let closeTimeout: ReturnType<typeof setTimeout> | undefined;
-
+      let openTimeout: ReturnType<typeof setTimeout>;
+      let closeTimeout: ReturnType<typeof setTimeout>;
       dropdownContainer.addEventListener('mouseenter', () => {
         clearTimeout(closeTimeout);
         openTimeout = setTimeout(openMenu, 200);
       });
-
       dropdownContainer.addEventListener('mouseleave', () => {
         clearTimeout(openTimeout);
         closeTimeout = setTimeout(closeMenu, 300);
       });
     } else {
-      // --- 移动端 (触摸屏) 的逻辑 ---
       triggerButton.addEventListener('click', (event) => {
         event.stopPropagation();
-        const isOpen = dropdownContainer.classList.contains('open');
-        if (isOpen) {
-          closeMenu();
-        } else {
-          openMenu();
-        }
+        dropdownContainer.classList.toggle('open');
+        triggerButton.setAttribute('aria-expanded', dropdownContainer.classList.contains('open'));
       });
     }
 
-    // --- 以下是两种设备共享的逻辑 ---
     const menuLinks = dropdownContainer.querySelectorAll('.dropdown-menu a');
-    menuLinks.forEach(link => {
-      link.addEventListener('click', closeMenu);
-    });
-
-    document.addEventListener('click', (event) => {
-      if (!dropdownContainer.contains(event.target as Node)) {
-        closeMenu();
-      }
-    });
+    menuLinks.forEach(link => link.addEventListener('click', closeMenu));
     
-    const handleEscKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && dropdownContainer.classList.contains('open')) {
-        closeMenu();
-      }
-    };
+    // 添加全局监听器
+    document.addEventListener('click', handleClickOutside);
     document.addEventListener('keydown', handleEscKey);
   }
 
+  function cleanupDropdown() {
+    // 移除全局监听器，防止“僵尸”事件
+    document.removeEventListener('click', handleClickOutside);
+    document.removeEventListener('keydown', handleEscKey);
+    
+    // 移除初始化标记，以便下次能重新初始化
+    const dropdownContainer = document.querySelector('[data-dropdown-container]');
+    if (dropdownContainer) {
+      dropdownContainer.removeAttribute('data-initialized');
+    }
+  }
+
+  // 核心：完整的生命周期管理
   initializeDropdown();
   document.addEventListener('astro:after-swap', initializeDropdown);
+  document.addEventListener('astro:before-swap', cleanupDropdown);
 </script>
