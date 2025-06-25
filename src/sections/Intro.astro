@@ -1,14 +1,32 @@
 ---
-import Card from '../components/Card.astro'
+// 此组件的当前设计不需要导入任何子组件
 ---
 
 <section class="py-16 lg:py-32">
-  <div class="container flex flex-col gap-16">
-    <div class="flex flex-col gap-4">
-      <h2 class="text-neutral-700 text-3xl lg:text-4xl [&>strong]:font-medium">
-        这里要写什么？
+  <div class="container">
+    <!-- 
+      使用 text-center 让标题和段落居中显示
+      使用 max-w-3xl mx-auto 限制段落的最大宽度，避免在宽屏上文字拉得太长，提升可读性
+    -->
+    <div class="flex flex-col gap-4 text-center">
+      <h2 class="text-neutral-700 text-3xl lg:text-4xl [&>strong]:font-medium dark:text-neutral-200">
+        服务器介绍
       </h2>
-      <p class="text-neutral-500 lg:text-lg">
-        なつき不知道
+      <p class="text-neutral-500 lg:text-lg max-w-3xl mx-auto dark:text-neutral-400">
+        这是一个由非官方点兔频道运营的《请问您今天要来点兔子吗》主题自建服务器。
+        <br class="hidden sm:block" /> {/* 在中等及以上尺寸屏幕上换行，优化排版 */}
+        我们是一个
+        <!-- 
+          使用带有背景色和圆角的 span 标签来创建“徽章”效果
+          颜色取自主题的 primary 和 secondary，保证风格统一
+        -->
+        <span class="font-medium text-sm px-2.5 py-1 rounded-full bg-primary/10 text-primary">休闲</span>
+        与
+        <span class="font-medium text-sm px-2.5 py-1 rounded-full bg-secondary/10 text-secondary">公益</span>
+        性质的社区。
+        <br class="hidden sm:block" />
+        更多详情，欢迎通过页面上方的按钮加入我们的QQ群或QQ频道！
       </p>
+    </div>
+  </div>
 </section>

@@ -18,14 +18,41 @@ import Sidebar from '../layouts/Sidebar.astro'
       title="点兔频道｜木结构街道服务器"
       description="请问您今天要来点Minecraft吗？"
     >
-      <div class="flex flex-wrap justify-center gap-4">
-        <Button href="/guide/server_guide" label="查看服务器指南" />
-        <Button
-          href="https://qun.qq.com/universal-share/share?ac=1&authKey=Qvd01Pvcjb%2B2i9bsIecTcsdBgyde1bOikhojhCo2K4ddShwH5p8bFNLHdzFiVHeJ&busi_data=eyJncm91cENvZGUiOiIxNzI4NDY4MzkiLCJ0b2tlbiI6IlJteEtYaENlUDVRR3hLMk5naE11EQjArdElyUjU2RWUwM1dieURJVUNnaG82aGM5bXBxOTUzMkFBRjM5bndubkIiLCJ1aW4iOiIxNDg5OTc4ODQyIn0%3D&data=bjEQoTz9hMcDYQxrw-UjmWpStD9MFa7s-4jqa8oJomSa-CMPTIPkjEn9jF8jrFZfYQyIzl75pG-Fvf9tEGwFnA&svctype=4&tempid=h5_group_info"
-          label="加入QQ群"
-          target="_blank"
-          class="btn-pink"
-        />
+      <div class="flex flex-wrap justify-center items-center gap-4">
+        <Button href="/guide/server_guide" label="📖 查看服务器指南" />
+
+        <div class="relative" data-dropdown-container>
+          <button
+            type="button"
+            class="btn-pink dropdown-trigger flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            🐧 加入社区 <span class="text-xs">▼</span>
+          </button>
+          <div
+            class="dropdown-menu absolute top-full mt-2 w-48 origin-top-left rounded-md bg-white p-2 text-left shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-150 ease-out"
+            role="menu"
+            aria-orientation="vertical"
+          >
+            <a
+              href="https://qun.qq.com/universal-share/share?ac=1&authKey=Qvd01Pvcjb%2B2i9bsIecTcsdBgyde1bOikhojhCo2K4ddShwH5p8bFNLHdzFiVHeJ&busi_data=eyJncm91cENvZGUiOiIxNzI4NDY4MzkiLCJ0b2tlbiI6IlJteEtYaENlUDVRR3hLMk5naE11EQjArdElyUjU2RWUwM1dieURJVUNnaG82aGM5bXBxOTUzMkFBRjM5bndubkIiLCJ1aW4iOiIxNDg5OTc4ODQyIn0%3D&data=bjEQoTz9hMcDYQxrw-UjmWpStD9MFa7s-4jqa8oJomSa-CMPTIPkjEn9jF8jrFZfYQyIzl75pG-Fvf9tEGwFnA&svctype=4&tempid=h5_group_info"
+              target="_blank"
+              class="block w-full rounded-md px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100"
+              role="menuitem"
+            >
+              加入QQ群
+            </a>
+            <a
+              href="https://pd.qq.com/s/57mw8fwlg?b=5"
+              target="_blank"
+              class="block w-full rounded-md px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100"
+              role="menuitem"
+            >
+              加入QQ频道
+            </a>
+          </div>
+        </div>
       </div>
     </Hero>
     <Intro />
@@ -33,27 +60,82 @@ import Sidebar from '../layouts/Sidebar.astro'
   <Footer />
 </Layout>
 
-<!-- 
-  最终完美版样式：统一了背景、边框和字体粗细，确保两个按钮视觉上完全一致 
--->
 <style>
   .btn-pink {
-    /* 默认状态 */
-    background-color: #FFC0CB; /* 浅粉色背景 */
-    color: #18181b; /* 深色文字 */
-    border-color: #FFC0CB; /* 边框颜色与背景相同，保证尺寸 */
-    font-weight: 500; /* 关键：设置字体粗细为 medium，与默认按钮匹配 */
+    background-color: #FFC0CB;
+    color: #18181b;
+    border: 1px solid #FFC0CB;
+    font-weight: 500;
   }
-
   .btn-pink:hover {
-    /* 鼠标悬停状态 */
-    background-color: #F8B0BE; /* 稍深的粉色 */
-    border-color: #F8B0BE; /* 边框颜色也一起变深，保持尺寸 */
+    background-color: #F8B0BE;
+    border-color: #F8B0BE;
   }
-
   .btn-pink:focus-visible {
-    /* 键盘聚焦状态 */
-    box-shadow: 0 0 0 3px rgba(255, 192, 203, 0.6); /* 粉色光环 */
+    box-shadow: 0 0 0 3px rgba(255, 192, 203, 0.6);
     outline: none;
   }
+
+  .dropdown-menu {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+    visibility: hidden;
+  }
+
+  [data-dropdown-container].open .dropdown-menu {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    visibility: visible;
+  }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const dropdownContainer = document.querySelector('[data-dropdown-container]');
+    if (!dropdownContainer) return;
+
+    const triggerButton = dropdownContainer.querySelector('.dropdown-trigger');
+    
+    let openTimeout;
+    let closeTimeout;
+
+    const openMenu = () => {
+      dropdownContainer.classList.add('open');
+      triggerButton.setAttribute('aria-expanded', 'true');
+    };
+
+    const closeMenu = () => {
+      dropdownContainer.classList.remove('open');
+      triggerButton.setAttribute('aria-expanded', 'false');
+    };
+
+    // 鼠标进入整个容器（按钮+菜单）时触发
+    dropdownContainer.addEventListener('mouseenter', () => {
+      clearTimeout(closeTimeout); // 取消任何待关闭的计划
+      openTimeout = setTimeout(openMenu, 200); // 延迟200毫秒后打开
+    });
+
+    // 鼠标离开整个容器时触发
+    dropdownContainer.addEventListener('mouseleave', () => {
+      clearTimeout(openTimeout); // 取消任何待打开的计划
+      closeTimeout = setTimeout(closeMenu, 300); // 延迟300毫秒后关闭
+    });
+    
+    // 点击菜单内的链接后，也应该关闭菜单
+    const menuLinks = dropdownContainer.querySelectorAll('.dropdown-menu a');
+    menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            clearTimeout(closeTimeout); // 立即关闭，无需等待
+            closeMenu();
+        });
+    });
+
+    // 按下 Escape 键时关闭菜单
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && dropdownContainer.classList.contains('open')) {
+        clearTimeout(closeTimeout); // 立即关闭
+        closeMenu();
+      }
+    });
+  });
+</script>
