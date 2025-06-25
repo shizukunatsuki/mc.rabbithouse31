@@ -35,7 +35,6 @@ import Sidebar from '../layouts/Sidebar.astro'
             role="menu"
             aria-orientation="vertical"
           >
-            {/* 更新了QQ群链接 */}
             <a
               href="https://qm.qq.com/q/fZDqrHvjHO"
               target="_blank"
@@ -91,7 +90,7 @@ import Sidebar from '../layouts/Sidebar.astro'
 </style>
 
 <script>
-  // 核心修复：将所有交互逻辑封装到一个函数中
+  // 最终修复：将所有交互逻辑封装到一个函数中
   function initializeDropdown() {
     const dropdownContainer = document.querySelector('[data-dropdown-container]');
     if (!dropdownContainer) return;
@@ -99,8 +98,9 @@ import Sidebar from '../layouts/Sidebar.astro'
     const triggerButton = dropdownContainer.querySelector('.dropdown-trigger');
     if (!triggerButton) return;
     
-    let openTimeout;
-    let closeTimeout;
+    // 最终修复：使用 ReturnType<typeof setTimeout> 来获取正确的计时器类型
+    let openTimeout: ReturnType<typeof setTimeout> | undefined;
+    let closeTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const openMenu = () => {
       dropdownContainer.classList.add('open');
@@ -109,45 +109,4 @@ import Sidebar from '../layouts/Sidebar.astro'
 
     const closeMenu = () => {
       dropdownContainer.classList.remove('open');
-      triggerButton.setAttribute('aria-expanded', 'false');
-    };
-
-    dropdownContainer.addEventListener('mouseenter', () => {
-      clearTimeout(closeTimeout);
-      openTimeout = setTimeout(openMenu, 200);
-    });
-
-    dropdownContainer.addEventListener('mouseleave', () => {
-      clearTimeout(openTimeout);
-      closeTimeout = setTimeout(closeMenu, 300);
-    });
-    
-    const menuLinks = dropdownContainer.querySelectorAll('.dropdown-menu a');
-    menuLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            clearTimeout(closeTimeout);
-            closeMenu();
-        });
-    });
-  }
-
-  // 核心修复：在 Astro 视图过渡完成后，重新运行我们的初始化函数
-  document.addEventListener('astro:after-swap', initializeDropdown);
-
-  // 首次加载时也运行初始化函数
-  initializeDropdown();
-
-  // 将全局事件监听器移到外部，避免重复绑定
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-        const openDropdown = document.querySelector('[data-dropdown-container].open');
-        if (openDropdown) {
-            openDropdown.classList.remove('open');
-            const trigger = openDropdown.querySelector('.dropdown-trigger');
-            if (trigger) {
-                trigger.setAttribute('aria-expanded', 'false');
-            }
-        }
-    }
-  });
-</script>
+      triggerButton.setAttribute('aria-expanded',
