@@ -1,6 +1,6 @@
 ---
 import { Button } from 'free-astro-components'
-import Code from '../components/Code.astro'
+// import Code from '../components/Code.astro' // 清理：移除了未使用的导入
 import Footer from '../components/Footer.astro'
 import Header from '../components/Header.astro'
 import Hero from '../sections/Hero.astro'
@@ -95,9 +95,12 @@ import Sidebar from '../layouts/Sidebar.astro'
     if (!dropdownContainer) return;
 
     const triggerButton = dropdownContainer.querySelector('.dropdown-trigger');
+    // 修复：在使用前进行非空检查
+    if (!triggerButton) return;
     
-    let openTimeout;
-    let closeTimeout;
+    // 修复：为计时器变量添加明确的类型
+    let openTimeout: number | undefined;
+    let closeTimeout: number | undefined;
 
     const openMenu = () => {
       dropdownContainer.classList.add('open');
@@ -109,31 +112,29 @@ import Sidebar from '../layouts/Sidebar.astro'
       triggerButton.setAttribute('aria-expanded', 'false');
     };
 
-    // 鼠标进入整个容器（按钮+菜单）时触发
     dropdownContainer.addEventListener('mouseenter', () => {
-      clearTimeout(closeTimeout); // 取消任何待关闭的计划
-      openTimeout = setTimeout(openMenu, 200); // 延迟200毫秒后打开
+      clearTimeout(closeTimeout);
+      // @ts-ignore - setTimeout在浏览器和Node.js中返回类型不同，为兼容性忽略此行
+      openTimeout = setTimeout(openMenu, 200);
     });
 
-    // 鼠标离开整个容器时触发
     dropdownContainer.addEventListener('mouseleave', () => {
-      clearTimeout(openTimeout); // 取消任何待打开的计划
-      closeTimeout = setTimeout(closeMenu, 300); // 延迟300毫秒后关闭
+      clearTimeout(openTimeout);
+      // @ts-ignore - setTimeout在浏览器和Node.js中返回类型不同，为兼容性忽略此行
+      closeTimeout = setTimeout(closeMenu, 300);
     });
     
-    // 点击菜单内的链接后，也应该关闭菜单
     const menuLinks = dropdownContainer.querySelectorAll('.dropdown-menu a');
     menuLinks.forEach(link => {
         link.addEventListener('click', () => {
-            clearTimeout(closeTimeout); // 立即关闭，无需等待
+            clearTimeout(closeTimeout);
             closeMenu();
         });
     });
 
-    // 按下 Escape 键时关闭菜单
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && dropdownContainer.classList.contains('open')) {
-        clearTimeout(closeTimeout); // 立即关闭
+        clearTimeout(closeTimeout);
         closeMenu();
       }
     });
