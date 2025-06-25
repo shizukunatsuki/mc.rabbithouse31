@@ -1,6 +1,5 @@
 ---
 import { Button } from 'free-astro-components'
-// import Code from '../components/Code.astro' // 保持清理
 import Footer from '../components/Footer.astro'
 import Header from '../components/Header.astro'
 import Hero from '../sections/Hero.astro'
@@ -90,7 +89,7 @@ import Sidebar from '../layouts/Sidebar.astro'
 </style>
 
 <script>
-  // 最终修复：将所有交互逻辑封装到一个函数中
+  // 将所有逻辑封装到一个函数中
   function initializeDropdown() {
     const dropdownContainer = document.querySelector('[data-dropdown-container]');
     if (!dropdownContainer) return;
@@ -98,9 +97,8 @@ import Sidebar from '../layouts/Sidebar.astro'
     const triggerButton = dropdownContainer.querySelector('.dropdown-trigger');
     if (!triggerButton) return;
     
-    // 最终修复：使用 ReturnType<typeof setTimeout> 来获取正确的计时器类型
-    let openTimeout: ReturnType<typeof setTimeout> | undefined;
-    let closeTimeout: ReturnType<typeof setTimeout> | undefined;
+    let openTimeout;
+    let closeTimeout;
 
     const openMenu = () => {
       dropdownContainer.classList.add('open');
@@ -109,4 +107,58 @@ import Sidebar from '../layouts/Sidebar.astro'
 
     const closeMenu = () => {
       dropdownContainer.classList.remove('open');
-      triggerButton.setAttribute('aria-expanded',
+      triggerButton.setAttribute('aria-expanded', 'false');
+    };
+    
+    // 检测是否为触摸设备
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    if (isTouchDevice) {
+      // --- 移动端（触摸屏）的“点击”逻辑 ---
+      triggerButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isOpen = dropdownContainer.classList.toggle('open');
+        triggerButton.setAttribute('aria-expanded', String(isOpen));
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!dropdownContainer.contains(event.target)) {
+          closeMenu();
+        }
+      });
+    } else {
+      // --- 桌面端（鼠标）的“悬停”逻辑 ---
+      dropdownContainer.addEventListener('mouseenter', () => {
+        clearTimeout(closeTimeout);
+        openTimeout = setTimeout(openMenu, 200);
+      });
+
+      dropdownContainer.addEventListener('mouseleave', () => {
+        clearTimeout(openTimeout);
+        closeTimeout = setTimeout(closeMenu, 300);
+      });
+    }
+    
+    // --- 通用逻辑 ---
+    const menuLinks = dropdownContainer.querySelectorAll('.dropdown-menu a');
+    menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            clearTimeout(closeTimeout);
+            closeMenu();
+        });
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && dropdownContainer.classList.contains('open')) {
+        clearTimeout(closeTimeout);
+        closeMenu();
+      }
+    });
+  }
+
+  // 首次加载时运行
+  initializeDropdown();
+  
+  // 每次视图过渡（页面切换）后都重新运行，这是解决问题的关键
+  document.addEventListener('astro:after-swap', initializeDropdown);
+</script>
