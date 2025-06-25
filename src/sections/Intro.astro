@@ -1,32 +1,142 @@
 ---
-// 此组件的当前设计不需要导入任何子组件
+import { Button } from 'free-astro-components'
+// import Code from '../components/Code.astro' // 清理：移除了未使用的导入
+import Footer from '../components/Footer.astro'
+import Header from '../components/Header.astro'
+import Hero from '../sections/Hero.astro'
+import Intro from '../sections/Intro.astro'
+import Layout from '../layouts/Layout.astro'
+import Sidebar from '../layouts/Sidebar.astro'
 ---
 
-<section class="py-16 lg:py-32">
-  <div class="container">
-    <!-- 
-      使用 text-center 让标题和段落居中显示
-      使用 max-w-3xl mx-auto 限制段落的最大宽度，避免在宽屏上文字拉得太长，提升可读性
-    -->
-    <div class="flex flex-col gap-4 text-center">
-      <h2 class="text-neutral-700 text-3xl lg:text-4xl [&>strong]:font-medium dark:text-neutral-200">
-        服务器介绍
-      </h2>
-      <p class="text-neutral-500 lg:text-lg max-w-3xl mx-auto dark:text-neutral-400">
-        这是一个由非官方点兔频道运营的《请问您今天要来点兔子吗》主题自建服务器。
-        <br class="hidden sm:block" /> {/* 在中等及以上尺寸屏幕上换行，优化排版 */}
-        我们是一个
-        <!-- 
-          使用带有背景色和圆角的 span 标签来创建“徽章”效果
-          颜色取自主题的 primary 和 secondary，保证风格统一
-        -->
-        <span class="font-medium text-sm px-2.5 py-1 rounded-full bg-primary/10 text-primary">休闲</span>
-        与
-        <span class="font-medium text-sm px-2.5 py-1 rounded-full bg-secondary/10 text-secondary">公益</span>
-        性质的社区。
-        <br class="hidden sm:block" />
-        更多详情，欢迎通过页面上方的按钮加入我们的QQ群或QQ频道！
-      </p>
-    </div>
-  </div>
-</section>
+<Layout title="welcome come on~">
+  <Sidebar class="lg:hidden" />
+  <Header />
+  <main>
+    <Hero
+      align="center"
+      title="点兔频道｜木结构街道服务器"
+      description="请问您今天要来点Minecraft吗？"
+    >
+      <div class="flex flex-wrap justify-center items-center gap-4">
+        <Button href="/guide/server_guide" label="📖 查看服务器指南" />
+
+        <div class="relative" data-dropdown-container>
+          <button
+            type="button"
+            class="btn-pink dropdown-trigger flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            🐧 加入社区 <span class="text-xs">▼</span>
+          </button>
+          <div
+            class="dropdown-menu absolute top-full mt-2 w-48 origin-top-left rounded-md bg-white p-2 text-left shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-150 ease-out"
+            role="menu"
+            aria-orientation="vertical"
+          >
+            <a
+              href="https://qun.qq.com/universal-share/share?ac=1&authKey=Qvd01Pvcjb%2B2i9bsIecTcsdBgyde1bOikhojhCo2K4ddShwH5p8bFNLHdzFiVHeJ&busi_data=eyJncm91cENvZGUiOiIxNzI4NDY4MzkiLCJ0b2tlbiI6IlJteEtYaENlUDVRR3hLMk5naE11EQjArdElyUjU2RWUwM1dieURJVUNnaG82aGM5bXBxOTUzMkFBRjM5bndubkIiLCJ1aW4iOiIxNDg5OTc4ODQyIn0%3D&data=bjEQoTz9hMcDYQxrw-UjmWpStD9MFa7s-4jqa8oJomSa-CMPTIPkjEn9jF8jrFZfYQyIzl75pG-Fvf9tEGwFnA&svctype=4&tempid=h5_group_info"
+              target="_blank"
+              class="block w-full rounded-md px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100"
+              role="menuitem"
+            >
+              加入QQ群
+            </a>
+            <a
+              href="https://pd.qq.com/s/57mw8fwlg?b=5"
+              target="_blank"
+              class="block w-full rounded-md px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100"
+              role="menuitem"
+            >
+              加入QQ频道
+            </a>
+          </div>
+        </div>
+      </div>
+    </Hero>
+    <Intro />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .btn-pink {
+    background-color: #FFC0CB;
+    color: #18181b;
+    border: 1px solid #FFC0CB;
+    font-weight: 500;
+  }
+  .btn-pink:hover {
+    background-color: #F8B0BE;
+    border-color: #F8B0BE;
+  }
+  .btn-pink:focus-visible {
+    box-shadow: 0 0 0 3px rgba(255, 192, 203, 0.6);
+    outline: none;
+  }
+
+  .dropdown-menu {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+    visibility: hidden;
+  }
+
+  [data-dropdown-container].open .dropdown-menu {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    visibility: visible;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const dropdownContainer = document.querySelector('[data-dropdown-container]');
+    if (!dropdownContainer) return;
+
+    const triggerButton = dropdownContainer.querySelector('.dropdown-trigger');
+    // 修复：在使用前进行非空检查
+    if (!triggerButton) return;
+    
+    // 修复：为计时器变量添加明确的类型
+    let openTimeout: number | undefined;
+    let closeTimeout: number | undefined;
+
+    const openMenu = () => {
+      dropdownContainer.classList.add('open');
+      triggerButton.setAttribute('aria-expanded', 'true');
+    };
+
+    const closeMenu = () => {
+      dropdownContainer.classList.remove('open');
+      triggerButton.setAttribute('aria-expanded', 'false');
+    };
+
+    dropdownContainer.addEventListener('mouseenter', () => {
+      clearTimeout(closeTimeout);
+      // @ts-ignore - setTimeout在浏览器和Node.js中返回类型不同，为兼容性忽略此行
+      openTimeout = setTimeout(openMenu, 200);
+    });
+
+    dropdownContainer.addEventListener('mouseleave', () => {
+      clearTimeout(openTimeout);
+      // @ts-ignore - setTimeout在浏览器和Node.js中返回类型不同，为兼容性忽略此行
+      closeTimeout = setTimeout(closeMenu, 300);
+    });
+    
+    const menuLinks = dropdownContainer.querySelectorAll('.dropdown-menu a');
+    menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            clearTimeout(closeTimeout);
+            closeMenu();
+        });
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && dropdownContainer.classList.contains('open')) {
+        clearTimeout(closeTimeout);
+        closeMenu();
+      }
+    });
+  });
+</script>
