@@ -1,17 +1,18 @@
 ---
-// 移除了 ThemeSwitch 的导入
 import { Icon } from 'free-astro-components'
 import Hamburguer from './Hamburguer.astro'
 ---
 
 <header
-  class="fixed inset-x-0 top-0 bg-neutral-100/60 text-neutral-700 py-4 border-b border-neutral-300/50 backdrop-blur-md z-20"
+  id="main-header"
+  class="fixed inset-x-0 top-0 text-white py-4 z-20 transition-all duration-300 ease-in-out"
 >
   <div class="container flex justify-between items-center gap-8">
     <a
-      class="text-primary hover:text-secondary text-4xl font-bold leading-none transition duration-300 ease-in-out"
+      id="header-logo"
+      class="text-white hover:text-zinc-200 text-4xl font-bold leading-none transition-colors duration-300 ease-in-out"
       href="/"
-      aria-label="Free Astro components"
+      aria-label="返回首页"
     >
       <Icon icon="ellipse" class="w-8 h-8" />
     </a>
@@ -20,7 +21,8 @@ import Hamburguer from './Hamburguer.astro'
       <ul class="flex items-center gap-8">
         <li>
           <a
-            class="text-sm hover:text-primary transition duration-300 ease-in-out"
+            id="header-nav-link"
+            class="text-sm text-white hover:text-zinc-200 transition-colors duration-300 ease-in-out"
             href="https://rabbithouse31.natsuki.cloud/"
             target="_blank"
             rel="noopener noreferrer"
@@ -38,6 +40,7 @@ import Hamburguer from './Hamburguer.astro'
 <script>
   import { DOMLoaded } from '../ts/utils'
 
+  // 汉堡菜单的原始脚本
   DOMLoaded(() => {
     const body = document.querySelector('body') as HTMLElement
     const hamburguer = document.querySelector(
@@ -51,4 +54,44 @@ import Hamburguer from './Hamburguer.astro'
       body.classList.toggle('overflow-hidden')
     })
   })
+
+  // 新增的顶栏滚动效果脚本
+  function handleHeaderScroll() {
+    const header = document.getElementById('main-header');
+    const logo = document.getElementById('header-logo');
+    const navLink = document.getElementById('header-nav-link');
+    if (!header || !logo || !navLink) return;
+
+    const scrollThreshold = 50; // 向下滚动50像素后触发变化
+
+    if (window.scrollY > scrollThreshold) {
+      // 滚动后的样式
+      header.classList.add('bg-neutral-100/60', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-neutral-300/50');
+      header.classList.remove('text-white');
+      header.classList.add('text-neutral-700');
+      
+      logo.classList.remove('text-white', 'hover:text-zinc-200');
+      logo.classList.add('text-primary', 'hover:text-secondary');
+      
+      navLink.classList.remove('text-white', 'hover:text-zinc-200');
+      navLink.classList.add('text-neutral-700', 'hover:text-primary');
+
+    } else {
+      // 恢复到顶部的默认样式
+      header.classList.remove('bg-neutral-100/60', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-neutral-300/50');
+      header.classList.remove('text-neutral-700');
+      header.classList.add('text-white');
+
+      logo.classList.remove('text-primary', 'hover:text-secondary');
+      logo.classList.add('text-white', 'hover:text-zinc-200');
+
+      navLink.classList.remove('text-neutral-700', 'hover:text-primary');
+      navLink.classList.add('text-white', 'hover:text-zinc-200');
+    }
+  }
+
+  // 监听滚动事件
+  document.addEventListener('scroll', handleHeaderScroll, { passive: true });
+  // 页面加载时也执行一次，以防页面刷新时不在顶部
+  document.addEventListener('DOMContentLoaded', handleHeaderScroll);
 </script>

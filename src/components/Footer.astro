@@ -2,39 +2,54 @@
 import { Icon } from 'free-astro-components'
 ---
 
-<footer class="py-8 lg:py-12 border-t border-neutral-300/50">
+{/* 
+  改动：
+  1. 移除了顶部的 border。
+  2. 增加了更多的垂直内边距 (py-12 lg:py-16)，使其感觉更开阔。
+  3. 添加了从非常浅的灰色到白色的微妙背景渐变，使其与页面内容柔和地融合。
+  4. 为暗黑模式也添加了对应的渐变。
+*/}
+<footer class="py-12 lg:py-16 bg-gradient-to-t from-neutral-100/70 to-white dark:from-zinc-900 dark:to-zinc-800">
   <div class="container">
     <div
       class="flex flex-col gap-8 lg:flex-row lg:justify-between lg:items-center"
     >
-      <!-- 左侧内容: Logo 和署名 -->
-      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
+      {/* 
+        改动：
+        将左侧内容包裹在一个新的 flex 容器中，
+        确保 Logo 和署名在所有屏幕尺寸下都保持完美的垂直对齐。
+      */}
+      <div class="flex items-center gap-4">
         <a
           href="/"
-          class="text-primary hover:text-secondary transition duration-300 ease-in-out"
-          aria-label="Free Astro components"
+          class="text-primary hover:text-secondary transition-transform duration-300 ease-in-out hover:scale-110"
+          aria-label="返回首页"
         >
           <Icon icon="ellipse" class="w-10 h-10" />
         </a>
-        <p class="text-neutral-500">
+        <p class="text-sm text-neutral-500 dark:text-neutral-400">
           by rabbithouse31 team
         </p>
       </div>
 
-      <!-- 右侧导航 -->
+      {/* 右侧导航 */}
       <nav>
         <ul class="text-neutral-500 flex flex-col gap-2 lg:flex-row lg:gap-8">
           <li>
+            {/* 
+              改动：
+              1. 调整了链接文字颜色，使其在浅色背景上更清晰。
+              2. 增加了更平滑的过渡效果。
+            */}
             <a 
               href="https://rabbithouse31.natsuki.cloud/" 
-              class="hover:text-primary transition-colors"
+              class="text-base text-neutral-600 hover:text-primary transition-colors duration-300 dark:text-neutral-300"
               target="_blank"
               rel="noopener noreferrer"
             >
               关于我们
             </a>
           </li>
-          <!-- 如果需要，可以在这里添加更多链接 -->
         </ul>
       </nav>
     </div>

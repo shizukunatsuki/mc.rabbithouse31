@@ -1,13 +1,14 @@
 ---
-import HeroGradient from '../components/HeroGradient.astro'
+import HeroGradient from '../components/HeroGradient.astro';
 
 interface Props {
-  title?: string
-  description?: string
-  align?: 'center' | 'left'
+  title?: string;
+  description?: string;
+  align?: 'center' | 'left';
+  bgImage?: string; 
 }
 
-const { title, description, align = 'left' } = Astro.props
+const { title, description, align = 'left', bgImage } = Astro.props;
 ---
 
 <section
@@ -16,7 +17,18 @@ const { title, description, align = 'left' } = Astro.props
   <div
     class="relative flex items-center w-full h-full bg-gradient-to-b from-primary/5 via-primary/0 via-70% to-secondary/5 rounded-3xl overflow-clip"
   >
-    <HeroGradient />
+    {!bgImage && <HeroGradient />}
+
+    {bgImage && (
+      <div class="absolute inset-0 w-full h-full">
+        <img
+          src={bgImage}
+          alt="服务器背景图"
+          class="w-full h-full object-cover"
+        />
+        <div class="absolute inset-0 bg-black/40"></div>
+      </div>
+    )}
 
     <div
       class:list={[
@@ -29,6 +41,7 @@ const { title, description, align = 'left' } = Astro.props
           title && (
             <h1
               class:list={[
+                bgImage ? 'text-white text-with-shadow' : '',
                 'text-[8vw] sm:text-[7.5vw] md:text-[7vw] lg:text-[6vw] xl:text-[5vw] leading-none [&>strong]:font-medium',
                 align === 'center' ? 'mx-auto' : '',
               ]}
@@ -39,12 +52,17 @@ const { title, description, align = 'left' } = Astro.props
         {
           description && (
             <p
+              id="typewriter-description"
+              data-text={description}
               class:list={[
-                'text-neutral-500 lg:text-lg',
+                bgImage ? 'text-white text-with-shadow' : 'text-neutral-500',
+                'lg:text-lg min-h-[1.75rem]',
                 align === 'center' ? 'mx-auto' : '',
               ]}
-              set:html={description}
-            />
+            >
+              <!-- 初始状态为一个空格，防止抖动，并等待JS填充 -->
+               
+            </p>
           )
         }
       </div>
@@ -55,3 +73,57 @@ const { title, description, align = 'left' } = Astro.props
     </div>
   </div>
 </section>
+
+<style>
+  .text-with-shadow {
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+  }
+
+  #typewriter-description.typing::after {
+    content: '|';
+    animation: blink 1s step-end infinite;
+    margin-left: 0.25rem;
+  }
+
+  @keyframes blink {
+    from, to { opacity: 1; }
+    50% { opacity: 0; }
+  }
+</style>
+
+<script>
+  function runTypewriter() {
+    const element = document.getElementById('typewriter-description');
+    // 检查元素是否存在，以及是否已经执行过动画
+    if (!element || element.hasAttribute('data-typed')) {
+      return;
+    }
+
+    const textToType = element.dataset.text;
+    if (!textToType) return;
+
+    // 标记为已执行，防止重复触发
+    element.setAttribute('data-typed', 'true');
+    element.classList.add('typing');
+
+    let i = 0;
+    const typingSpeed = 150;
+
+    function type() {
+      if (i < textToType.length) {
+        // 使用 innerHTML，因为初始内容是  
+        element.innerHTML = textToType.substring(0, i + 1);
+        i++;
+        setTimeout(type, typingSpeed);
+      } else {
+        element.classList.remove('typing');
+      }
+    }
+
+    // 延迟一小段时间后开始，确保页面元素稳定
+    setTimeout(type, 500);
+  }
+
+  // 使用 astro:page-load 事件，这是Astro 4+推荐的、最可靠的页面加载事件
+  document.addEventListener('astro:page-load', runTypewriter);
+</script>
