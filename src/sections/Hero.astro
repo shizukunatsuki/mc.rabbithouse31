@@ -94,12 +94,9 @@ const { title, description, align = 'left', bgImage } = Astro.props;
   function runTypewriter() {
     const element = document.getElementById('typewriter-description');
 
-    // 最终的、类型安全的结构：
-    // 只有当 element 存在且未执行过动画时，才进入逻辑块。
     if (element && !element.hasAttribute('data-typed')) {
       const textToType = element.dataset.text;
 
-      // 再次检查，确保 data-text 属性也存在。
       if (textToType) {
         element.setAttribute('data-typed', 'true');
         element.classList.add('typing');
@@ -107,15 +104,15 @@ const { title, description, align = 'left', bgImage } = Astro.props;
         let i = 0;
         const typingSpeed = 150;
 
-        // 将 type 函数定义在 element 和 textToType 确认有效的闭包内。
-        // 这样 TypeScript 就能确定它们在回调中是安全的。
         function type() {
-          if (i < textToType.length) {
-            element.innerHTML = textToType.substring(0, i + 1);
+          // 因为此函数是异步调用的，所以我们使用非空断言 `!` 
+          // 来向 TypeScript 保证，在执行时这些变量是有效的。
+          if (i < textToType!.length) {
+            element!.innerHTML = textToType!.substring(0, i + 1);
             i++;
             setTimeout(type, typingSpeed);
           } else {
-            element.classList.remove('typing');
+            element!.classList.remove('typing');
           }
         }
 
