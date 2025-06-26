@@ -60,7 +60,6 @@ const { title, description, align = 'left', bgImage } = Astro.props;
                 align === 'center' ? 'mx-auto' : '',
               ]}
             >
-              <!-- 初始状态为一个空格，防止抖动，并等待JS填充 -->
                
             </p>
           )
@@ -94,15 +93,17 @@ const { title, description, align = 'left', bgImage } = Astro.props;
 <script>
   function runTypewriter() {
     const element = document.getElementById('typewriter-description');
-    // 检查元素是否存在，以及是否已经执行过动画
-    if (!element || element.hasAttribute('data-typed')) {
+
+    // Main guard clause: If element doesn't exist, or its data-text is missing,
+    // or if it has already been typed, exit immediately.
+    // This resolves all TypeScript errors.
+    if (!element || !element.dataset.text || element.hasAttribute('data-typed')) {
       return;
     }
 
+    // Now TypeScript knows that `element` and `element.dataset.text` are valid.
     const textToType = element.dataset.text;
-    if (!textToType) return;
-
-    // 标记为已执行，防止重复触发
+    
     element.setAttribute('data-typed', 'true');
     element.classList.add('typing');
 
@@ -111,7 +112,6 @@ const { title, description, align = 'left', bgImage } = Astro.props;
 
     function type() {
       if (i < textToType.length) {
-        // 使用 innerHTML，因为初始内容是  
         element.innerHTML = textToType.substring(0, i + 1);
         i++;
         setTimeout(type, typingSpeed);
@@ -120,10 +120,8 @@ const { title, description, align = 'left', bgImage } = Astro.props;
       }
     }
 
-    // 延迟一小段时间后开始，确保页面元素稳定
     setTimeout(type, 500);
   }
 
-  // 使用 astro:page-load 事件，这是Astro 4+推荐的、最可靠的页面加载事件
   document.addEventListener('astro:page-load', runTypewriter);
 </script>
