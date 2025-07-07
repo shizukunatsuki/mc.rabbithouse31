@@ -38,60 +38,70 @@ import Hamburguer from './Hamburguer.astro'
 </header>
 
 <script>
-  import { DOMLoaded } from '../ts/utils'
+  // 将所有需要在页面加载/切换后运行的逻辑封装起来
+  function setupHeader() {
+    // --- 汉堡包菜单逻辑 ---
+    const body = document.querySelector('body');
+    const hamburguer = document.querySelector('[data-hamburguer]');
+    const nav = document.querySelector('[data-nav]');
 
-  // 汉堡菜单的原始脚本
-  DOMLoaded(() => {
-    const body = document.querySelector('body') as HTMLElement
-    const hamburguer = document.querySelector(
-      '[data-hamburguer]'
-    ) as HTMLButtonElement
-    const nav = document.querySelector('[data-nav]') as HTMLElement
+    // 添加安全检查，确保元素存在
+    if (body && hamburguer && nav) {
+      hamburguer.addEventListener('click', () => {
+        hamburguer.toggleAttribute('open');
+        nav.toggleAttribute('open');
+        body.classList.toggle('overflow-hidden');
+      });
+    }
 
-    hamburguer.addEventListener('click', () => {
-      hamburguer.toggleAttribute('open')
-      nav.toggleAttribute('open')
-      body.classList.toggle('overflow-hidden')
-    })
-  })
-
-  // 新增的顶栏滚动效果脚本
-  function handleHeaderScroll() {
+    // --- 顶栏滚动效果逻辑 ---
+    // 1. 在外部缓存DOM元素，避免在滚动时重复查询
     const header = document.getElementById('main-header');
     const logo = document.getElementById('header-logo');
     const navLink = document.getElementById('header-nav-link');
+
+    // 添加安全检查
     if (!header || !logo || !navLink) return;
 
-    const scrollThreshold = 50; // 向下滚动50像素后触发变化
+    const scrollThreshold = 50;
 
-    if (window.scrollY > scrollThreshold) {
-      // 滚动后的样式
-      header.classList.add('bg-neutral-100/60', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-neutral-300/50');
-      header.classList.remove('text-white');
-      header.classList.add('text-neutral-700');
-      
-      logo.classList.remove('text-white', 'hover:text-zinc-200');
-      logo.classList.add('text-primary', 'hover:text-secondary');
-      
-      navLink.classList.remove('text-white', 'hover:text-zinc-200');
-      navLink.classList.add('text-neutral-700', 'hover:text-primary');
+    // 2. 定义滚动处理函数
+    function handleHeaderScroll() {
+      if (window.scrollY > scrollThreshold) {
+        // 滚动后的样式
+        header.classList.add('bg-neutral-100/60', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-neutral-300/50');
+        header.classList.remove('text-white');
+        header.classList.add('text-neutral-700');
+        
+        logo.classList.remove('text-white', 'hover:text-zinc-200');
+        logo.classList.add('text-primary', 'hover:text-secondary');
+        
+        navLink.classList.remove('text-white', 'hover:text-zinc-200');
+        navLink.classList.add('text-neutral-700', 'hover:text-primary');
 
-    } else {
-      // 恢复到顶部的默认样式
-      header.classList.remove('bg-neutral-100/60', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-neutral-300/50');
-      header.classList.remove('text-neutral-700');
-      header.classList.add('text-white');
+      } else {
+        // 恢复到顶部的默认样式
+        header.classList.remove('bg-neutral-100/60', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-neutral-300/50');
+        header.classList.remove('text-neutral-700');
+        header.classList.add('text-white');
 
-      logo.classList.remove('text-primary', 'hover:text-secondary');
-      logo.classList.add('text-white', 'hover:text-zinc-200');
+        logo.classList.remove('text-primary', 'hover:text-secondary');
+        logo.classList.add('text-white', 'hover:text-zinc-200');
 
-      navLink.classList.remove('text-neutral-700', 'hover:text-primary');
-      navLink.classList.add('text-white', 'hover:text-zinc-200');
+        navLink.classList.remove('text-neutral-700', 'hover:text-primary');
+        navLink.classList.add('text-white', 'hover:text-zinc-200');
+      }
     }
+
+    // 3. 绑定滚动事件
+    // 注意：这里每次页面切换都会重新绑定，但对于 document 级别的事件通常没问题。
+    // 如果是复杂情况，可能需要考虑在页面切换前解绑事件。
+    document.addEventListener('scroll', handleHeaderScroll, { passive: true });
+    
+    // 4. 立即执行一次，以设置初始状态
+    handleHeaderScroll();
   }
 
-  // 监听滚动事件
-  document.addEventListener('scroll', handleHeaderScroll, { passive: true });
-  // 页面加载时也执行一次，以防页面刷新时不在顶部
-  document.addEventListener('DOMContentLoaded', handleHeaderScroll);
+  // 使用 astro:page-load 事件来确保每次页面切换后脚本都能重新运行
+  document.addEventListener('astro:page-load', setupHeader);
 </script>
