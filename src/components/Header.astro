@@ -38,15 +38,16 @@ import Hamburguer from './Hamburguer.astro'
 </header>
 
 <script>
-  // 将所有需要在页面加载/切换后运行的逻辑封装起来
   function setupHeader() {
     // --- 汉堡包菜单逻辑 ---
     const body = document.querySelector('body');
     const hamburguer = document.querySelector('[data-hamburguer]');
     const nav = document.querySelector('[data-nav]');
 
-    // 添加安全检查，确保元素存在
     if (body && hamburguer && nav) {
+      // 为了防止在页面切换时重复添加事件监听器，
+      // 我们可以先移除旧的监听器，但这对于简单点击事件来说通常不是必需的。
+      // 这里保持简单，因为 astro:page-load 后的元素是全新的。
       hamburguer.addEventListener('click', () => {
         hamburguer.toggleAttribute('open');
         nav.toggleAttribute('open');
@@ -55,18 +56,18 @@ import Hamburguer from './Hamburguer.astro'
     }
 
     // --- 顶栏滚动效果逻辑 ---
-    // 1. 在外部缓存DOM元素，避免在滚动时重复查询
     const header = document.getElementById('main-header');
     const logo = document.getElementById('header-logo');
     const navLink = document.getElementById('header-nav-link');
-
-    // 添加安全检查
-    if (!header || !logo || !navLink) return;
-
     const scrollThreshold = 50;
 
-    // 2. 定义滚动处理函数
     function handleHeaderScroll() {
+      // **核心修复**：将安全检查移到这里！
+      // 这样 TypeScript 就能确定在后续代码块中，这些变量不是 null。
+      if (!header || !logo || !navLink) {
+        return;
+      }
+
       if (window.scrollY > scrollThreshold) {
         // 滚动后的样式
         header.classList.add('bg-neutral-100/60', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-neutral-300/50');
@@ -93,12 +94,11 @@ import Hamburguer from './Hamburguer.astro'
       }
     }
 
-    // 3. 绑定滚动事件
-    // 注意：这里每次页面切换都会重新绑定，但对于 document 级别的事件通常没问题。
-    // 如果是复杂情况，可能需要考虑在页面切换前解绑事件。
+    // 移除旧的监听器以避免内存泄漏，虽然对 document 影响不大，但这是个好习惯。
+    document.removeEventListener('scroll', handleHeaderScroll);
     document.addEventListener('scroll', handleHeaderScroll, { passive: true });
     
-    // 4. 立即执行一次，以设置初始状态
+    // 立即执行一次以设置初始状态
     handleHeaderScroll();
   }
 
